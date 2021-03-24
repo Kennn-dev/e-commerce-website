@@ -1,0 +1,72 @@
+// Configure everything that has to do with Express application.
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const bodyParser = require("body-parser");
+const xss = require("xss-clean");
+const passport = require("passport");
+const passportFacebook = require("passport-facebook");
+const app = express();
+
+// Allow Cross-Origin requests
+app.use(cors());
+
+// Set security for HTTPs headers
+app.use(helmet());
+
+//Body Parser Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+//protect XSS
+app.use(xss());
+
+//passport
+app.use(passport.initialize());
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((id, done) => {
+  return done(null, id);
+});
+passport.use(
+  new passportFacebook.Strategy(
+    {
+      clientID: process.env.FB_ID,
+      clientSecret: process.env.FB_SECRET_ID,
+      callbackURL: "http://localhost:4001/auth/facebook/callback",
+      profileFields: ["email", "name"],
+    },
+    function (accessToken, refreshToken, profile, callback) {
+      //, callback
+      console.log(profile);
+      return callback(null, profile);
+    }
+  )
+);
+
+//Handle Routes
+// app.use("/auth", require("./routes/authRoutes"));
+app.get(
+  "/auth/facebook",
+  passport.authenticate("facebook", { scope: "email" })
+);
+app.get(
+  "/auth/facebook/callback",
+  passport.authenticate("facebook", {
+    successRedirect: "/users/login",
+  })
+);
+app.use("/users", require("./routes/userRoutes"));
+
+//Handle Error
+app.all("*", (req, res, next) => {
+  res.status(404).json({
+    status: "fail",
+    message: `Url : ${req.originalUrl} doesn't exist !!!`,
+  });
+  next();
+});
+
+module.exports = app;

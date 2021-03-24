@@ -1,0 +1,33 @@
+import mongoose, { Schema } from "mongoose";
+import { userSchema } from "./user";
+import { itemCartSchema } from "./itemCart";
+
+const orderSchema = new Schema(
+  {
+    userOrder: userSchema,
+    totalAmount: {
+      type: String,
+      required: true,
+    },
+    orderStatus: {
+      type: String,
+      required: true,
+    },
+    orderTime: {
+      type: Date,
+      required: true,
+    },
+    isCheckout: {
+      type: Boolean,
+      default: false,
+    },
+    products: [itemCartSchema],
+  },
+  {
+    timestamp: true,
+  }
+);
+
+const Order = new mongoose.model("Orders", orderSchema);
+
+export default Order;
