@@ -54,3 +54,7 @@ exports.register = function register(req, res) {
     res.send({ error });
   }
 };
+
+exports.login = function login(req, res) {
+  //this is login
+};
