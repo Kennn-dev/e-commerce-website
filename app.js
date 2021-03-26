@@ -8,6 +8,7 @@ const passport = require("passport");
 const passportFacebook = require("passport-facebook");
 const app = express();
 
+const authMiddleWare = require("./middlewares/auth");
 // Allow Cross-Origin requests
 app.use(cors());
 
@@ -20,6 +21,8 @@ app.use(bodyParser.json());
 
 //protect XSS
 app.use(xss());
+
+//auth middlewares
 
 //passport
 app.use(passport.initialize());
@@ -46,8 +49,16 @@ passport.use(
   )
 );
 
-//Handle Routes
-// app.use("/auth", require("./routes/authRoutes"));
+// //Handle Error
+// app.all("*", (req, res, next) => {
+//   res.status(404).json({
+//     status: "fail",
+//     message: `Url : ${req.originalUrl} doesn't exist !!!`,
+//   });
+//   next();
+// });
+
+//routes
 app.get(
   "/auth/facebook",
   passport.authenticate("facebook", { scope: "email" })
@@ -59,14 +70,8 @@ app.get(
   })
 );
 app.use("/users", require("./routes/userRoutes"));
-
-//Handle Error
-app.all("*", (req, res, next) => {
-  res.status(404).json({
-    status: "fail",
-    message: `Url : ${req.originalUrl} doesn't exist !!!`,
-  });
-  next();
-});
+app.use(authMiddleWare.jwtAuth);
+//test
+app.use("/products", require("./routes/productRoutes"));
 
 module.exports = app;

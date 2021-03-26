@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { itemCartSchema } = require("./itemCart");
-const roles = ["producer", "customer"];
+// const roles = ["producer", "customer"];
 
 const Schema = mongoose.Schema;
 const userSchema = new Schema(
@@ -29,8 +29,8 @@ const userSchema = new Schema(
     },
     currentCart: [itemCartSchema],
     role: {
-      type: [{ type: String, enum: roles }],
-      default: ["customer"],
+      type: String,
+      default: "Customer",
     }, /// ???
   },
   {
