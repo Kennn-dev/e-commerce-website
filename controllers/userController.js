@@ -23,6 +23,7 @@ const isValidSignUp = async (username, email) => {
 
 exports.register = async function register(req, res) {
   const { username, email, password } = req.body;
+  // console.log(req.body);
   try {
     const isValid = await isValidSignUp(username, email);
     if (isValid) {
@@ -41,7 +42,7 @@ exports.register = async function register(req, res) {
     }
   } catch (error) {
     // console.log(error);
-    res.status(400);
+    // res.status(400);
     res.send({ error: error.message });
   }
 };
@@ -93,6 +94,7 @@ exports.login = async function login(req, res) {
       );
       // console.log(user);
       res.send({
+        success: "Login success 🎉",
         accessToken,
         refreshToken,
       });
@@ -101,7 +103,7 @@ exports.login = async function login(req, res) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400);
+    // res.status(400);
     res.send({ error: error.message });
   }
 };

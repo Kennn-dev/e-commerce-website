@@ -48,16 +48,6 @@ passport.use(
     }
   )
 );
-
-// //Handle Error
-// app.all("*", (req, res, next) => {
-//   res.status(404).json({
-//     status: "fail",
-//     message: `Url : ${req.originalUrl} doesn't exist !!!`,
-//   });
-//   next();
-// });
-
 //routes
 app.get(
   "/auth/facebook",
