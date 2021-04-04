@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
-
+const userSchema = require("./user");
+const { imageSchema } = require("./image");
 const Schema = mongoose.Schema;
-
 const productSchema = new Schema(
   {
     name: {
+      //
       type: String,
       required: true,
     },
     desc: {
+      //
       type: String,
       required: true,
     },
@@ -20,12 +22,14 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
-    categories: [String],
+    categories: [String], //
     price: {
-      type: String, ////
-      required: true,
+      //
+      type: Number,
+      default: 0,
     },
     brand: {
+      //
       type: String,
       required: true,
     },
@@ -33,7 +37,8 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
-    //// Seller ???
+    images: [imageSchema], //
+    seller: userSchema, //
     sold: {
       type: String,
       default: 0,

@@ -2,7 +2,6 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const jwtAuth = async (req, res, next) => {
-  y;
   const tokenFromRequest = await req.headers.authorization;
 
   if (tokenFromRequest) {
@@ -12,17 +11,18 @@ const jwtAuth = async (req, res, next) => {
       const verifiedToken = jwt.verify(token, process.env.ACCESS_TOKEN);
 
       //save info token then next()
-      req.user = verifiedToken;
+      // console.log(verifiedToken);
+      req.user = verifiedToken; //object
       next();
     } catch (error) {
       //not valid token
 
-      res.status(401);
+      // res.status(401);
       res.send({ error: "Unauthorized 🔐" });
     }
   } else {
     //not have token
-    res.status(403).send({ error: "Who are you ??? 🤔" });
+    res.send({ error: "Who are you ??? 🤔" });
   }
 };
 

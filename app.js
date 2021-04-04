@@ -8,7 +8,7 @@ const passport = require("passport");
 const passportFacebook = require("passport-facebook");
 const app = express();
 
-const authMiddleWare = require("./middlewares/auth");
+// const authMiddleWare = require("./middlewares/auth");
 // Allow Cross-Origin requests
 app.use(cors());
 
@@ -21,8 +21,6 @@ app.use(bodyParser.json());
 
 //protect XSS
 app.use(xss());
-
-//auth middlewares
 
 //passport
 app.use(passport.initialize());
@@ -60,8 +58,9 @@ app.get(
   })
 );
 app.use("/users", require("./routes/userRoutes"));
-app.use(authMiddleWare.jwtAuth);
-//test
 app.use("/products", require("./routes/productRoutes"));
+// app.use(authMiddleWare.jwtAuth);
+//test
+// app.use("/products", require("./routes/productRoutes"));
 
 module.exports = app;
