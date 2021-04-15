@@ -2,9 +2,18 @@ require("dotenv").config();
 const fs = require("fs");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
+
+//
 const { User } = require("../models/user");
-const { Image } = require("../models/image");
+// const { Image } = require("../models/image");
 const { Product } = require("../models/product");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
 
 //GET
 exports.getAll = async function getAll(req, res) {
@@ -30,37 +39,50 @@ exports.createNewProduct = async function createNewProduct(req, res) {
       //add file later
       const files = req.files;
       const imageArr = files.map((file) => {
-        const img = fs.readFileSync(file.path);
-        const encodeImg = img.toString("base64");
-        // return Buffer.from(encodeImg, "base64");
-        const newFile = {
-          name: file.originalname,
-          contentType: file.mimetype,
-          base64: encodeImg,
-        };
-
-        return new Image(newFile);
+        return file.path;
+        // const img = fs.readFileSync(file.path);
+        // return img.toString("base64");
+        // const newFile = {
+        //   name: file.originalname,
+        //   contentType: file.mimetype,
+        //   base64: encodeImg,
+        // };
+        // return new Image(newFile);
       });
-
-      // res.send({ file: req.file, buffer: encodeImg });
-      // res.send()
       const { name, desc, categories, price, brand, available } = req.body;
-      const product = new Product({
-        name,
-        desc,
-        categories,
-        price, //number
-        brand,
-        available,
-        images: imageArr,
-        seller: user,
-      });
+      const listUrl = await Promise.all(
+        imageArr.map(async (item) => {
+          // console.log(typeof item);
+          return await cloudinary.uploader.upload(
+            item,
+            function (error, result) {
+              if (error) {
+                console.log({ error });
+              }
+              console.log(result);
+              return result;
+            }
+          );
+        })
+      );
+      console.log(listUrl);
+      res.send(listUrl);
+      // const product = new Product({
+      //   name,
+      //   desc,
+      //   categories,
+      //   price, //number
+      //   brand,
+      //   available,
+      //   images: imageArr,
+      //   seller: user,
+      // });
       // console.log(product);
-      product.save().then((rs) => {
-        if (rs === product)
-          //  res.send(product);
-          res.send({ success: `${product.name} was add by ${user.username}` });
-      });
+      // product.save().then((rs) => {
+      //   if (rs === product)
+      //     //  res.send(product);
+      //     res.send({ success: `${product.name} was add by ${user.username}` });
+      // });
     }
   } catch (error) {
     console.log(error);

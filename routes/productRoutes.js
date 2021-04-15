@@ -33,24 +33,5 @@ router.post(
     res.send({ error: err.message });
   }
 );
-// router.post(
-//   "/image",
-//   ,
-//   async (req, res) => {
-//     try {
-//       if (req.file) {
-//         const img = fs.readFileSync(req.file.path);
-//         const encodeImg = img.toString("binary");
-//         res.send({ file: req.file, buffer: encodeImg });
-//         // res.send()
-//       }
-//     } catch (error) {
-//       res.json(error.message);
-//     }
-//   },
-//   (err, req, res, next) => {
-//     res.status(400).send({ error: err.message });
-//   }
-// );
 
 module.exports = router;
