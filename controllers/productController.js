@@ -40,15 +40,8 @@ exports.createNewProduct = async function createNewProduct(req, res) {
       const files = req.files;
       const imageArr = files.map((file) => {
         return file.path;
-        // const img = fs.readFileSync(file.path);
-        // return img.toString("base64");
-        // const newFile = {
-        //   name: file.originalname,
-        //   contentType: file.mimetype,
-        //   base64: encodeImg,
-        // };
-        // return new Image(newFile);
       });
+      const arrImg = [];
       const { name, desc, categories, price, brand, available } = req.body;
       const listUrl = await Promise.all(
         imageArr.map(async (item) => {
@@ -59,30 +52,29 @@ exports.createNewProduct = async function createNewProduct(req, res) {
               if (error) {
                 console.log({ error });
               }
-              console.log(result);
-              return result;
+              // console.log(result);
+              arrImg.push(result.url);
+              // return result;
             }
           );
         })
       );
-      console.log(listUrl);
-      res.send(listUrl);
-      // const product = new Product({
-      //   name,
-      //   desc,
-      //   categories,
-      //   price, //number
-      //   brand,
-      //   available,
-      //   images: imageArr,
-      //   seller: user,
-      // });
+      const product = new Product({
+        name,
+        desc,
+        categories,
+        price, //number
+        brand,
+        available,
+        images: arrImg,
+        seller: user,
+      });
       // console.log(product);
-      // product.save().then((rs) => {
-      //   if (rs === product)
-      //     //  res.send(product);
-      //     res.send({ success: `${product.name} was add by ${user.username}` });
-      // });
+      product.save().then((rs) => {
+        if (rs === product)
+          //  res.send(product);
+          res.send({ success: `${product.name} was add by ${user.username}` });
+      });
     }
   } catch (error) {
     console.log(error);

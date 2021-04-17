@@ -37,7 +37,7 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
-    images: [imageSchema], //
+    images: [String], //
     seller: userSchema, //
     sold: {
       type: String,
