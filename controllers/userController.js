@@ -21,6 +21,16 @@ const isValidSignUp = async (username, email) => {
   return true;
 };
 
+exports.getAll = async function getAll(req, res) {
+  try {
+    //validate admin
+    const user = await User.find();
+    res.send(user);
+  } catch (error) {
+    res.send({ error });
+  }
+};
+
 exports.register = async function register(req, res) {
   const { username, email, password } = req.body;
   // console.log(req.body);

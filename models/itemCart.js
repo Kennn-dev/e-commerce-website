@@ -20,5 +20,9 @@ const itemCartSchema = new Schema(
 );
 
 const ItemCart = new mongoose.model("ItemCarts", itemCartSchema);
-module.exports.itemCartSchema = itemCartSchema;
-module.exports.ItemCart = ItemCart;
+// module.exports.itemCartSchema = itemCartSchema;
+// module.exports.ItemCart = ItemCart;
+module.exports = {
+  itemCartSchema,
+  ItemCart,
+};

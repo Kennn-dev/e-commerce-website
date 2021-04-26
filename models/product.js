@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 const userSchema = require("./user");
-const { imageSchema } = require("./image");
+const mongoosePaginate = require("mongoose-paginate-v2");
+const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
+const { categorySchema } = require("./categories");
 const Schema = mongoose.Schema;
+
 const productSchema = new Schema(
   {
     name: {
@@ -22,7 +25,7 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
-    categories: [String], //
+    categories: [categorySchema], //
     price: {
       //
       type: Number,
@@ -48,8 +51,13 @@ const productSchema = new Schema(
     timestamp: true,
   }
 );
-
+productSchema.plugin(mongoosePaginate);
+productSchema.plugin(mongoose_fuzzy_searching, {
+  fields: ["name"],
+});
 const Product = new mongoose.model("Products", productSchema);
 
-module.exports.productSchema = productSchema;
-module.exports.Product = Product;
+module.exports = {
+  productSchema,
+  Product,
+};

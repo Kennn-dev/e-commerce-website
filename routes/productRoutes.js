@@ -12,7 +12,7 @@ const upload = multer({
     fileSize: 25000000, //25Mb :D
   },
   fileFilter: (req, file, cb) => {
-    if (!file.originalname.match(/\.(jpg|png|JPG|PNG|JPEG|jpeg)$/)) {
+    if (!file.originalname.match(/\.(jpg|png|JPG|PNG|JPEG|jpeg|svg)$/)) {
       cb(new Error("Wrong format file"));
     } else {
       cb(null, true);
@@ -21,7 +21,19 @@ const upload = multer({
 });
 
 //GET
-router.get("/", productController.getAll);
+router.get("/", productController.getAll, (err, req, res, next) => {
+  console.log(err);
+  res.send({ error: err.message });
+});
+router.get(
+  "/search",
+  productController.getBySearchQuery,
+  (err, req, res, next) => {
+    console.log(err);
+    res.send({ error: err.message });
+  }
+);
+
 //POST
 router.post(
   "/new",
@@ -33,5 +45,6 @@ router.post(
     res.send({ error: err.message });
   }
 );
-
+router.post("/edit/:id", jwtAuth, productController.editProduct);
+router.post("/delete/:id", jwtAuth, productController.deleteProduct);
 module.exports = router;
