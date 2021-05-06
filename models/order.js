@@ -24,10 +24,10 @@ const orderSchema = new Schema(
     products: [itemCartSchema],
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 
-const Order = new mongoose.model("Orders", orderSchema);
+const Order = mongoose.model("Orders", orderSchema);
 
 export default Order;

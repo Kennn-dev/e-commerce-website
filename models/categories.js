@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const ObjectId = mongoose.Types.ObjectId;
 const categorySchema = new Schema(
   {
     name: {
@@ -7,18 +8,21 @@ const categorySchema = new Schema(
       type: String,
       required: true,
     },
-    child: [String],
+    parent: {
+      type: ObjectId,
+    },
+    child: [ObjectId], //trash
     image: {
       //
       type: String,
     },
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 
-const Category = new mongoose.model("Categories", categorySchema);
+const Category = mongoose.model("Categories", categorySchema);
 
 // module.exports.categorySchema = categorySchema;
 // module.exports.Category = Category;

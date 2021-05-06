@@ -46,11 +46,6 @@ exports.getBySearchQuery = async function getBySearchQuery(req, res) {
   try {
     let { limit, page, search } = req.query;
     console.log(limit, page, search);
-
-    // const result = await Product.fuzzySearch({
-    //   query: search,
-    //   prefixOnly: true,
-    // });
     await Product.paginate(
       { $text: { $search: nGrams(search, false, 2, false).join(" ") } },
       { page: page ? page : 1, limit: limit ? limit : 100, sort: { date: -1 } },
@@ -69,7 +64,37 @@ exports.getBySearchQuery = async function getBySearchQuery(req, res) {
     res.send({ error: error.message });
   }
 };
+exports.getBySellerId = async function getBySellerId(req, res) {
+  try {
+    const { userId, username } = await req.user;
+    // console.log(userId, username);
+    const { id } = await req.params;
+    let { limit, page } = req.query;
 
+    // console.log({ id, userId });
+    if (userId !== id) throw Error("Id request is not match 🔒");
+    await Product.paginate(
+      { "seller._id": mongoose.Types.ObjectId(id) },
+      {
+        page: page !== undefined ? page : 1,
+        limit: limit !== undefined ? limit : 100,
+      },
+      function (err, rs) {
+        if (rs) {
+          // console.log(rs.docs);
+          res.send(rs.docs);
+        }
+        if (err) {
+          console.log(err);
+          throw new Error(err);
+        }
+      }
+    );
+  } catch (error) {
+    // console.log(error);
+    res.send({ error: error.message });
+  }
+};
 //POST
 exports.createNewProduct = async function createNewProduct(req, res) {
   try {
@@ -81,17 +106,36 @@ exports.createNewProduct = async function createNewProduct(req, res) {
     // console.log(decodedUser);
     if (decodedUser) {
       //add file later
-      const files = req.files;
-      const imageArr = files.map((file) => {
+
+      // const files = req.files;
+      // console.log(req);
+
+      const imageArr = req.files.map((file) => {
         return file.path;
       });
+
       const arrImg = [];
+      const cateArr = [];
       const { name, desc, categories, price, brand, available } = req.body;
+      // cast categories to Object ID : mongoose.Types.ObjectID(categories)
+
+      // add all categories parents & child if they had
       const category = await Category.findById(categories);
       if (!category) {
         throw Error("Cannot find Category");
       }
-      const listUrl = await Promise.all(
+      cateArr.push(category);
+      if (category.parent) {
+        const parent = await Category.findById(category.parent);
+        cateArr.push(parent);
+      }
+      if (category.child) {
+        const child = await Category.findById(category.child);
+        cateArr.push(child);
+      }
+
+      // uploads images to cloud - save url
+      await Promise.all(
         imageArr.map(async (item) => {
           // console.log(typeof item);
           return await cloudinary.uploader.upload(
@@ -102,18 +146,20 @@ exports.createNewProduct = async function createNewProduct(req, res) {
               }
               // console.log(result);
               arrImg.push(result.url);
-              // return result;
+              // return result.url;
             }
           );
         })
       );
+      // res.send({ categories: cateArr });
+      // res.send({ listUrl });
       const product = new Product({
         name,
         desc,
-        categories: category,
-        price, //number
+        categories: cateArr,
+        price: Number(price),
         brand,
-        available,
+        available: Number(available),
         images: arrImg,
         seller: user,
       });
@@ -121,12 +167,12 @@ exports.createNewProduct = async function createNewProduct(req, res) {
       product.save().then((rs) => {
         if (rs === product)
           //  res.send(product);
-          res.send({ success: `${product.name} was add by ${user.username}` });
+          res.send({ success: `${product.name} was added 🎉` });
       });
     }
   } catch (error) {
-    console.log(error);
-    res.send({ error });
+    // console.log(error);
+    res.send({ error: error.message });
   }
 };
 exports.editProduct = async function editProduct(req, res) {

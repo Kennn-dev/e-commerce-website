@@ -1,0 +1,10 @@
+ {
+        "child": null,
+        "_id": "6093c1c8c5d6c322245d39c0",
+        "name": "Clothing",
+        "parent": null,
+        "image": "http://res.cloudinary.com/ken-in-da-cloud/image/upload/v1620296136/fxtcpervsgjyracmygy4.png",
+        "createdAt": "2021-05-06T10:15:36.800Z",
+        "updatedAt": "2021-05-06T10:15:36.800Z",
+        "__v": 0
+    },

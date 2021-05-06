@@ -9,10 +9,10 @@ const getStream = require("get-stream");
 const upload = multer({
   dest: "D:/Đồ án tổng hợp/server/upload/product",
   limits: {
-    fileSize: 25000000, //25Mb :D
+    fileSize: 10000000, //10Mb :D
   },
   fileFilter: (req, file, cb) => {
-    if (!file.originalname.match(/\.(jpg|png|JPG|PNG|JPEG|jpeg|svg)$/)) {
+    if (!file.originalname.match(/\.(jpg|png|JPG|PNG|JPEG|jpeg|svg|jfif)$/)) {
       cb(new Error("Wrong format file"));
     } else {
       cb(null, true);
@@ -21,7 +21,7 @@ const upload = multer({
 });
 
 //GET
-router.get("/", productController.getAll, (err, req, res, next) => {
+router.get("/", productController.getAll, (err, req, res) => {
   console.log(err);
   res.send({ error: err.message });
 });
@@ -33,6 +33,7 @@ router.get(
     res.send({ error: err.message });
   }
 );
+router.get("/seller/:id", jwtAuth, productController.getBySellerId);
 
 //POST
 router.post(

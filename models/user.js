@@ -34,10 +34,12 @@ const userSchema = new Schema(
     }, /// ???
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 
-const User = new mongoose.model("Users", userSchema);
-module.exports.userSchema = userSchema;
-module.exports.User = User;
+const User = mongoose.model("Users", userSchema);
+module.exports = {
+  userSchema,
+  User,
+};

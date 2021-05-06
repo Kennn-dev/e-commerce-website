@@ -15,11 +15,11 @@ const itemCartSchema = new Schema(
     },
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 
-const ItemCart = new mongoose.model("ItemCarts", itemCartSchema);
+const ItemCart = mongoose.model("ItemCarts", itemCartSchema);
 // module.exports.itemCartSchema = itemCartSchema;
 // module.exports.ItemCart = ItemCart;
 module.exports = {

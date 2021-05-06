@@ -47,15 +47,13 @@ const productSchema = new Schema(
       default: 0,
     },
   },
-  {
-    timestamp: true,
-  }
+  { timestamps: true }
 );
 productSchema.plugin(mongoosePaginate);
 productSchema.plugin(mongoose_fuzzy_searching, {
-  fields: ["name"],
+  fields: ["name", "desc", "brand"],
 });
-const Product = new mongoose.model("Products", productSchema);
+const Product = mongoose.model("Products", productSchema);
 
 module.exports = {
   productSchema,
