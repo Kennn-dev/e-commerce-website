@@ -66,13 +66,13 @@ exports.getBySearchQuery = async function getBySearchQuery(req, res) {
 };
 exports.getBySellerId = async function getBySellerId(req, res) {
   try {
-    const { userId, username } = await req.user;
+    const { userId } = await req.user;
     // console.log(userId, username);
     const { id } = await req.params;
     let { limit, page } = req.query;
 
     // console.log({ id, userId });
-    if (userId !== id) throw Error("Id request is not match 🔒");
+    if (userId !== id) res.send({ error: "Id request is not match 🔒" });
     await Product.paginate(
       { "seller._id": mongoose.Types.ObjectId(id) },
       {
@@ -92,7 +92,7 @@ exports.getBySellerId = async function getBySellerId(req, res) {
     );
   } catch (error) {
     // console.log(error);
-    res.send({ error: error.message });
+    res.send({ error: error });
   }
 };
 //POST
@@ -100,15 +100,18 @@ exports.createNewProduct = async function createNewProduct(req, res) {
   try {
     //Authorization
     const decodedUser = await req.user;
+
     const user = await User.findById(decodedUser.userId).exec();
     // console.log(user);
-    if (!user) throw Error("Cannot find User");
+    if (!user) {
+      res.send({ error: "Cannot find User" });
+    }
     // console.log(decodedUser);
     if (decodedUser) {
       //add file later
 
       // const files = req.files;
-      // console.log(req);
+      console.log(req.files);
 
       const imageArr = req.files.map((file) => {
         return file.path;
@@ -143,6 +146,7 @@ exports.createNewProduct = async function createNewProduct(req, res) {
             function (error, result) {
               if (error) {
                 console.log({ error });
+                throw new Error(error);
               }
               // console.log(result);
               arrImg.push(result.url);
@@ -170,6 +174,7 @@ exports.createNewProduct = async function createNewProduct(req, res) {
           res.send({ success: `${product.name} was added 🎉` });
       });
     }
+    // res.send({ ok: req.body });
   } catch (error) {
     // console.log(error);
     res.send({ error: error.message });
