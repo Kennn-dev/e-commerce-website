@@ -95,6 +95,32 @@ exports.getBySellerId = async function getBySellerId(req, res) {
     res.send({ error: error });
   }
 };
+exports.getByProductId = async function getByProductId(req, res) {
+  try {
+    const { id } = req.params;
+
+    // console.log(limit, page);
+
+    // const result = await Product.find().limit(limit);
+    await Product.paginate(
+      { _id: mongoose.Types.ObjectId(id) },
+      {
+        page: 1,
+        limit: 100,
+      },
+      function (err, rs) {
+        if (rs) res.send(rs.docs);
+        if (err) {
+          console.log(err);
+          throw new Error(err);
+        }
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    res.send({ error });
+  }
+};
 //POST
 exports.createNewProduct = async function createNewProduct(req, res) {
   try {

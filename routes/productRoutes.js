@@ -25,6 +25,11 @@ router.get("/", productController.getAll, (err, req, res) => {
   console.log(err);
   res.send({ error: err.message });
 });
+
+router.get("/single/:id", productController.getByProductId, (err, req, res) => {
+  console.log(err);
+  res.send({ error: err.message });
+});
 router.get(
   "/search",
   productController.getBySearchQuery,
