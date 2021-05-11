@@ -41,16 +41,19 @@ router.get(
 router.get("/seller/:id", jwtAuth, productController.getBySellerId);
 
 //POST
+//handle images with different endpoints
+//response id img to client when they send file uploads
 router.post(
-  "/new",
-  jwtAuth,
-  upload.array("images", 10),
-  productController.createNewProduct,
-  (err, req, res, next) => {
+  "/image/upload",
+  upload.single("images", 10),
+  productController.uploadImage,
+  (req, res, next) => {
     console.log(err);
     res.send({ error: err.message });
   }
 );
+router.post("/image/destroy/:id", productController.destroyImage);
+router.post("/new", jwtAuth, productController.createNewProduct);
 router.post("/edit/:id", jwtAuth, productController.editProduct);
 router.post("/delete/:id", jwtAuth, productController.deleteProduct);
 module.exports = router;
