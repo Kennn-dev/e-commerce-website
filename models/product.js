@@ -51,7 +51,7 @@ const productSchema = new Schema(
 );
 productSchema.plugin(mongoosePaginate);
 productSchema.plugin(mongoose_fuzzy_searching, {
-  fields: ["name", "desc", "brand"],
+  fields: ["name", "brand"],
 });
 const Product = mongoose.model("Products", productSchema);
 

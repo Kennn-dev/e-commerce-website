@@ -44,7 +44,8 @@ exports.getAll = async function getAll(req, res) {
 exports.getBySearchQuery = async function getBySearchQuery(req, res) {
   try {
     let { limit, page, search } = req.query;
-    console.log(limit, page, search);
+    // console.log(limit, page, search);
+
     await Product.paginate(
       { $text: { $search: nGrams(search, false, 2, false).join(" ") } },
       { page: page ? page : 1, limit: limit ? limit : 100, sort: { date: -1 } },
@@ -182,15 +183,8 @@ exports.createNewProduct = async function createNewProduct(req, res) {
     if (decodedUser) {
       const cateArr = [];
       // console.log(req.body);
-      const {
-        name,
-        desc,
-        categories,
-        price,
-        brand,
-        available,
-        images,
-      } = req.body;
+      const { name, desc, categories, price, brand, available, images } =
+        req.body;
       // add all categories parents & child if they had
       const category = await Category.findById(categories); //
       if (!category) {
@@ -247,15 +241,8 @@ exports.editProduct = async function editProduct(req, res) {
       const cateArr = [];
 
       // console.log(req.body);
-      const {
-        name,
-        desc,
-        categories,
-        price,
-        brand,
-        available,
-        images,
-      } = await req.body;
+      const { name, desc, categories, price, brand, available, images } =
+        await req.body;
       // images.map((image) => console.log(image));
       // cast categories to Object ID : mongoose.Types.ObjectID(categories)
 
