@@ -6,7 +6,7 @@ const orderSchema = new Schema(
   {
     userOrder: userSchema,
     totalAmount: {
-      type: String,
+      type: Number,
       required: true,
     },
     orderStatus: {

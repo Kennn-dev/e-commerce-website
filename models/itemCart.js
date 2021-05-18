@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
 const { productSchema } = require("./product");
+const { userSchema } = require("./user");
 const Schema = mongoose.Schema;
 
 const itemCartSchema = new Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+    },
     product: productSchema,
     quantity: {
       type: Number,

@@ -9,12 +9,14 @@ const cloudinary = require("cloudinary").v2;
 const { User } = require("../models/user");
 const { Category } = require("../models/categories");
 const { Product } = require("../models/product");
+const { ItemCart } = require("../models/itemCart");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
+const objIdConvert = mongoose.Types.ObjectId;
 
 //GET
 exports.getAll = async function getAll(req, res) {
@@ -119,6 +121,17 @@ exports.getByProductId = async function getByProductId(req, res) {
   } catch (error) {
     console.log(error);
     res.send({ error });
+  }
+};
+exports.getItemInCart = async function getItemInCart(req, res) {
+  try {
+    const decodedUser = await req.user;
+    // const { userId } = req.params;
+    const itemInCart = await ItemCart.find({ userId: decodedUser.userId });
+    res.send(itemInCart);
+  } catch (error) {
+    res.status(403);
+    res.send({ error: error.message });
   }
 };
 
@@ -304,3 +317,103 @@ exports.deleteProduct = async function deleteProduct(req, res) {
     if (err) res.send({ error: err });
   }
 };
+exports.addToCart = async function addToCart(req, res) {
+  try {
+    const decodedUser = req.user;
+    let { quantity } = await req.body; /////////////////
+    if (!quantity) {
+      quantity = 1;
+    }
+    const user = await User.findById(decodedUser.userId);
+    // console.log(decodedUser.userId);
+    const { id } = await req.params; //id product here
+    if (!user) throw new Error("Cannot find User ��");
+    const productAdd = await Product.findById(id);
+    if (!productAdd) throw new Error("Cannot find Product ⚠");
+    //itemCart find userId ?  && product._id = id
+    const item = await ItemCart.findOne({
+      userId: decodedUser.userId,
+      "product._id": id,
+    });
+    if (!item) {
+      // create new item with amount and
+      const newItemCart = {
+        userId: decodedUser.userId,
+        product: productAdd,
+        quantity: Number(quantity),
+        amount: Number(productAdd.price) * Number(quantity),
+      };
+      // console.log({ item: newItemCart });
+      const itemCart = new ItemCart(newItemCart);
+      itemCart.save().then((rs) => {
+        // console.log(rs);
+        user.currentCart = [...user.currentCart, rs];
+        user.save();
+        res.send({ success: `Add success | Item id : ${rs._id} ✅` });
+      });
+    } else {
+      ///update item was exist
+      item.quantity = Number(item.quantity) + Number(quantity);
+      item.amount = Number(item.amount) + Number(productAdd.price * quantity);
+
+      item.save();
+      res.send({ success: `Update success | Item id : ${item._id} ✅` });
+      // console.log(item);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(403);
+    res.send({ error: error.message });
+  }
+};
+exports.removeFromCart = async function removeFromCart(req, res) {
+  try {
+    const decodedUser = req.user;
+    let { quantity } = await req.body; /////////////////
+    if (!quantity) {
+      quantity = 1;
+    }
+    const user = await User.findById(decodedUser.userId);
+    // console.log(decodedUser.userId);
+    const { id } = await req.params; //id product here
+    if (!user) throw new Error("Cannot find User ��");
+    //itemCart find userId ?  && product._id = id
+    const item = await ItemCart.findOne({
+      userId: decodedUser.userId,
+      _id: id,
+    });
+    if (!item) throw new Error("Item doesn't exist in your cart ��");
+    //remove item
+    if (Number(item.quantity) <= Number(quantity)) {
+      // Delete item from cart
+      await ItemCart.findByIdAndDelete(item._id).then((rs) => {
+        if (rs) {
+          res.send({ success: "Item was remove from your cart ��" });
+        }
+      });
+    } else {
+      // Decrease quantity
+      item.quantity = Number(item.quantity) - Number(quantity);
+      item.amount = Number(item.amount) - Number(item.product.price * quantity);
+
+      item.save();
+      res.send({ success: `Update success | Item id : ${item._id} ✅` });
+      // console.log(item);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(403);
+    res.send({ error: error.message });
+  }
+};
+// router.get('/autosearch/:key', (req, res) => {
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     let q = req.params.key;
+//     let query = {
+//         "$or": [{"name": {"$regex": q, "$options": "i"}}]
+//     };
+//     Item.find(query, 'name')
+//         .sort({date: -1})
+//         .limit(10)
+//         .then(items => res.json(items));
+// });

@@ -39,7 +39,7 @@ router.get(
   }
 );
 router.get("/seller/:id", jwtAuth, productController.getBySellerId);
-
+router.get("/in-cart", jwtAuth, productController.getItemInCart);
 //POST
 //handle images with different endpoints
 //response id img to client when they send file uploads
@@ -56,4 +56,8 @@ router.post("/image/destroy/:id", productController.destroyImage);
 router.post("/new", jwtAuth, productController.createNewProduct);
 router.post("/edit/:id", jwtAuth, productController.editProduct);
 router.post("/delete/:id", jwtAuth, productController.deleteProduct);
+router.post("/add-to-cart/:id", jwtAuth, productController.addToCart);
+router.post("/remove-from-cart/:id", jwtAuth, productController.removeFromCart);
 module.exports = router;
+
+//cartSchema -> [ ...itemSchema ]
