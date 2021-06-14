@@ -18,6 +18,15 @@ const itemCartSchema = new Schema(
       type: Number,
       default: 0,
     },
+    orderStatus: {
+      type: String,
+      enum: ["prepare", "shipping", "checkout", "cancel"],
+      default: "prepare",
+    },
+    isCheckout: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

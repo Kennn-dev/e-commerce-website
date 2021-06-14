@@ -26,6 +26,6 @@ router.get("/parent/", categoryController.getParentCategories);
 router.get("/child/:id", categoryController.getChildByParentID);
 
 //post
-router.post("/new", upload.single("image"), categoryController.createCategory);
+// router.post("/new", upload.single("image"), categoryController.createCategory);
 router.post("/delete/:id", categoryController.deleteCategory); ///Token jwt here
 module.exports = router;

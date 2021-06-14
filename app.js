@@ -8,6 +8,7 @@ const passport = require("passport");
 const passportFacebook = require("passport-facebook");
 const app = express();
 
+
 // const authMiddleWare = require("./middlewares/auth");
 // Allow Cross-Origin requests
 app.use(cors());
@@ -46,6 +47,7 @@ passport.use(
     }
   )
 );
+
 //routes
 app.get(
   "/auth/facebook",
@@ -60,6 +62,8 @@ app.get(
 app.use("/users", require("./routes/userRoutes"));
 app.use("/products", require("./routes/productRoutes"));
 app.use("/categories", require("./routes/categoryRoute"));
+app.use("/orders", require("./routes/orderRoutes"));
+app.use("/paypal", require("./routes/paypalRoute"));
 // app.use(authMiddleWare.jwtAuth);
 
 module.exports = app;

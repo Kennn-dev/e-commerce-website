@@ -1,25 +1,24 @@
-import mongoose, { Schema } from "mongoose";
-import { userSchema } from "./user";
-import { itemCartSchema } from "./itemCart";
-
+const mongoose = require("mongoose");
+const { itemCartSchema } = require("./itemCart");
+const { userSchema } = require("./user");
+const Schema = mongoose.Schema;
 const orderSchema = new Schema(
   {
     userOrder: userSchema,
-    totalAmount: {
-      type: Number,
+    phone: String,
+    address: String,
+    notice: String,
+    checkoutPayment: {
+      type: String,
       required: true,
     },
-    orderStatus: {
-      type: String,
+    totalAmount: {
+      type: Number,
       required: true,
     },
     orderTime: {
       type: Date,
       required: true,
-    },
-    isCheckout: {
-      type: Boolean,
-      default: false,
     },
     products: [itemCartSchema],
   },
@@ -30,4 +29,4 @@ const orderSchema = new Schema(
 
 const Order = mongoose.model("Orders", orderSchema);
 
-export default Order;
+module.exports = { Order };
