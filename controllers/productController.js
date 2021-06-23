@@ -10,6 +10,7 @@ const { User } = require("../models/user");
 const { Category } = require("../models/categories");
 const { Product } = require("../models/product");
 const { ItemCart } = require("../models/itemCart");
+const { Rating } = require("../models/rating");
 const {
   checkHasExistInCart,
   checkItemHasExistInCart,
@@ -52,7 +53,6 @@ exports.getAll = async function getAll(req, res) {
     res.send({ error });
   }
 };
-
 exports.getBySearchQuery = async function getBySearchQuery(req, res) {
   try {
     // * sortBy = "asc" or "desc"
@@ -96,8 +96,8 @@ exports.getBySellerId = async function getBySellerId(req, res) {
   try {
     const { userId } = await req.user;
     // console.log(userId, username);
-    const { id } = await req.params;
-    let { limit, page } = req.query;
+    const { id } = await request.params;
+    let { limit, page } = request.query;
 
     // console.log({ id, userId });
     if (userId !== id) res.send({ error: "Id request is not match 🔒" });
@@ -164,7 +164,6 @@ exports.getItemInCart = async function getItemInCart(req, res) {
     res.send({ error: error.message });
   }
 };
-//
 exports.getItemBySellerId = async function getItemBySellerId(req, res) {
   try {
   } catch (error) {}
@@ -290,46 +289,79 @@ exports.editProduct = async function editProduct(req, res) {
       const cateArr = [];
 
       // console.log(req.body);
-      const { name, desc, categories, price, brand, available, images } =
-        await req.body;
+      const {
+        name,
+        desc,
+        categories,
+        price,
+        brand,
+        available,
+        images,
+        like,
+        rating,
+      } = await req.body;
       // images.map((image) => console.log(image));
       // cast categories to Object ID : mongoose.Types.ObjectID(categories)
 
       // add all categories parents & child if they had
-      const category = await Category.findById(categories);
-      if (!category) {
-        throw Error("Cannot find Category");
-      }
-      cateArr.push(category);
-      if (category.parent) {
-        const parent = await Category.findById(category.parent);
-        cateArr.push(parent);
-      }
-      if (category.child) {
-        const child = await Category.findById(category.child);
-        cateArr.push(child);
-      }
-
-      const editProduct = {
-        name,
-        desc,
-        categories: cateArr,
-        price: Number(price),
-        brand,
-        available: Number(available),
-        images,
-        seller: user,
-      };
-      // console.log({ newProduct });
-      // res.send("ok");
-      await Product.findByIdAndUpdate(id, editProduct, (err, docs) => {
-        if (err) throw new Error(err);
-
+      if (like) {
+        const productWithOldLike = await Product.findById(id);
+        productWithOldLike.like += 1;
+        await productWithOldLike.save();
         res.status(200);
+        res.send({ success: `U was like this product 😍 ` });
         Product.SyncToAlgolia();
-        res.send({ success: "Update success 🎉" });
-      });
+      }
+      if (rating) {
+        const productInDB = await Product.findById(id);
+        const allRate = await productInDB.rating;
+        // TODOS : calc rating here
+        // * ((Overall Rating * Total Rating) + new Rating) / (Total Rating + 1)
+        let newRating = (allRate * rating + rating) / (allRate + 1);
+        // TODOS : Phan rating thanh 5 ti le khac nhau moi'' tinh' dc :cry:
+        productInDB.rating = newRating;
+        await productInDB
+          .save()
+          .then(() => res.send({ success: `U was rate this product 😄` }));
+      }
+
+      if (!like && !rating) {
+        const category = await Category.findById(categories);
+        if (!category) {
+          throw Error("Cannot find Category");
+        }
+        cateArr.push(category);
+        if (category.parent) {
+          const parent = await Category.findById(category.parent);
+          cateArr.push(parent);
+        }
+        if (category.child) {
+          const child = await Category.findById(category.child);
+          cateArr.push(child);
+        }
+
+        const editProduct = {
+          name,
+          desc,
+          categories: cateArr,
+          price: Number(price),
+          brand,
+          available: Number(available),
+          images,
+          seller: user,
+        };
+        // console.log({ newProduct });
+        // res.send("ok");
+        await Product.findByIdAndUpdate(id, editProduct, (err, docs) => {
+          if (err) throw new Error(err);
+
+          res.status(200);
+          Product.SyncToAlgolia();
+          res.send({ success: "Update success 🎉" });
+        });
+      }
     }
+
     // res.send({ ok: req.body });
   } catch (error) {
     console.log(error);
@@ -413,7 +445,6 @@ exports.removeFromCart = async function removeFromCart(req, res) {
   try {
     const decodedUser = req.user;
     const user = await User.findById(decodedUser.userId);
-    // console.log(decodedUser.userId);
     const { id } = await req.params; //id cartItem here
     console.log({ id });
     if (!user) throw new Error("Cannot find User ��");
@@ -424,7 +455,6 @@ exports.removeFromCart = async function removeFromCart(req, res) {
     // * Save new currentCart data
     user.currentCart = newCart;
     await user.save().then((rs) => {
-      // console.log({ rs });
       res.status(200);
       res.send({ success: `Delete success ✅` });
     });
@@ -468,3 +498,61 @@ exports.editQuantity = async function editQuantity(req, res) {
     res.send({ error: error.message });
   }
 };
+exports.editRating = async function editRating(req, res) {
+  try {
+    const decodedUser = req.user;
+    let { rateScore } = await req.body;
+    if (!rateScore) {
+      throw new Error(`Missing quantity value ��`);
+    }
+    const user = await User.findById(decodedUser.userId);
+    // * get id product via params
+    const { id } = await req.params;
+    if (!user) throw new Error("Cannot find User ��");
+    const product = await Product.findById(id);
+    if (!product) throw new Error("Cannot find product 😢");
+    // ?create that document with product id and user id
+    const rating = await Rating.find({
+      userId: decodedUser.userId,
+      productId: id,
+    });
+    console.log({ rating });
+    if (rating.length <= 0) {
+      const newRating = new Rating({
+        userId: decodedUser.userId,
+        productId: id,
+      });
+      newRating.save();
+      const count = await Rating.find({}).count();
+      if (count == 0) {
+        //*No rating for this product
+        product.rating = rateScore;
+        await product.save().then((doc) => {
+          if (doc) {
+            Product.SyncToAlgolia();
+            res.status(200);
+            res.send({ success: `Total rating : ${doc.rating}` });
+          }
+        });
+      } else {
+        product.rating = (product.rating + rateScore) / count;
+        await product.save().then((doc) => {
+          if (doc) {
+            Product.SyncToAlgolia();
+            res.status(200);
+            res.send({ success: `Total rating : ${doc.rating}` });
+          }
+        });
+      }
+    } else {
+      res.status(200);
+      res.send("You was rate this product");
+    }
+  } catch (error) {
+    res.status(403);
+    console.log(error);
+    res.send({ error: error.message });
+  }
+};
+
+// noice

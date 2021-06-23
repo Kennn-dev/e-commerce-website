@@ -68,8 +68,8 @@ productSchema.plugin(mongooseAlgolia, {
   mappings: {
     categories: function (value) {
       //Value is the 'namecategories' array ?
-     // return value.map((val) => val.name).join(" < ");
- return value.map((val) => val.name);
+      // return value.map((val) => val.name).join(" < ");
+      return value.map((val) => val.name);
     },
   },
 });

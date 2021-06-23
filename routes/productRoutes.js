@@ -61,6 +61,5 @@ router.post("/delete/:id", jwtAuth, productController.deleteProduct);
 router.post("/add-to-cart/:id", jwtAuth, productController.addToCart);
 router.post("/remove-from-cart/:id", jwtAuth, productController.removeFromCart);
 router.post("/edit-cart/:id", jwtAuth, productController.editQuantity);
+router.post("/rating/:id", jwtAuth, productController.editRating);
 module.exports = router;
-
-

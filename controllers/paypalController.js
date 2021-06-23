@@ -13,7 +13,7 @@ exports.test = function test(req, res) {
 
 exports.createRequest = async function createRequest(req, res) {
   try {
-    console.log(req.body);
+    console.log("ok", req.body.results);
     res.send({ success: "ok" });
   } catch (error) {
     console.log(error);

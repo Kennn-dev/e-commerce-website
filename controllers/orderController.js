@@ -5,6 +5,7 @@ const { payment, configure } = require("paypal-rest-sdk");
 const { Order } = require("../models/order");
 const axios = require("axios");
 const { clientPaypal } = require("../utils/functions");
+const { Product } = require("../models/product");
 const { ItemCart } = require("../models/itemCart");
 const { User } = require("../models/user");
 const { handleFilterCart } = require("./functions");
@@ -29,7 +30,9 @@ exports.getOrderWithUserId = async function getOrderWithUserId(req, res) {
   try {
     const { userId } = req.user;
     // console.log(userId);
-    const orders = await Order.find({ "userOrder._id": userId });
+    const orders = await Order.find({ "userOrder._id": userId })
+      .sort({ createdAt: -1 })
+      .exec();
     console.log(orders);
     res.status(200);
     res.send(orders);
@@ -60,11 +63,11 @@ exports.createOrder = async function createOrder(req, res) {
     console.log({ cartItemsId });
     const user = await User.findById(userId);
     if (!user) throw new Error(`Cannot find user`);
-    // let productList = [];
     let totalAmount = 0;
 
     // const convertedArr = cartItemsId.map((i) => mongoose.Types.ObjectId(i));
-    const productList = await ItemCart.find(
+
+    const itemsList = await ItemCart.find(
       {
         _id: { $in: [...cartItemsId] },
       },
@@ -72,14 +75,21 @@ exports.createOrder = async function createOrder(req, res) {
         // *docs : Array<ItemCart>
         // console.log(docs);
         // productList = docs;
-        docs.forEach((el) => {
+        docs.forEach(async (el) => {
           totalAmount += el.amount;
+          const idProd = el.product._id.toString();
+          console.log({ idProd });
+          const editProd = await Product.findById(idProd);
+          editProd.sold = editProd.sold + el.quantity;
+          editProd.available = editProd.available - el.quantity;
+          await editProd.save().then((rs) => console.log("Save"));
         });
         return docs;
       }
     );
-    console.log({ productList });
-    if (productList <= 0) throw new Error("Your cart is empty");
+    // console.log({ productList });
+    if (itemsList <= 0) throw new Error("Your cart is empty");
+
     const newOrder = {
       userOrder: user,
       notice: notice ? notice : "",
@@ -88,10 +98,11 @@ exports.createOrder = async function createOrder(req, res) {
       checkoutPayment,
       totalAmount,
       orderTime: Date.now(),
-      products: productList,
+      products: itemsList,
     };
 
     console.log({ newOrder });
+
     // *Save
     // TODOS : filter item currentCart ( ! delete )
     const filteredCart = await handleFilterCart(user.currentCart, cartItemsId);

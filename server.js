@@ -14,6 +14,7 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: true,
+    autoReconnect: true,
     useUnifiedTopology: true,
   })
   .then((connection) => {
@@ -23,6 +24,11 @@ mongoose
       searchableAttributes: ["name", "brand", "categories", "price"], //Sets the settings for this schema, see [Algolia's Index settings parameters](https://www.algolia.com/doc/api-client/javascript/settings#set-settings) for more info.
     });
     Product.SyncToAlgolia();
+  })
+  .catch((err) => {
+    if (err) {
+      console.error("Failed to connect to mongo on startup ", err);
+    }
   });
 
 app.listen(port, () => {
