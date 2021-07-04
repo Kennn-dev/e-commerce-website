@@ -14,7 +14,6 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: true,
-    autoReconnect: true,
     useUnifiedTopology: true,
   })
   .then((connection) => {

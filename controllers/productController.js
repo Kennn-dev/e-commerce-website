@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const { nGrams } = require("mongoose-fuzzy-searching/helpers");
 const cloudinary = require("cloudinary").v2;
-
+const { ObjectId } = mongoose.Types;
 //
 const { User } = require("../models/user");
 const { Category } = require("../models/categories");
@@ -20,13 +20,13 @@ const {
   index,
   categoriesToQuery,
 } = require("./functions");
+const { Order } = require("../models/order");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-const objIdConvert = mongoose.Types.ObjectId;
 
 //GET
 exports.getAll = async function getAll(req, res) {
@@ -96,8 +96,8 @@ exports.getBySellerId = async function getBySellerId(req, res) {
   try {
     const { userId } = await req.user;
     // console.log(userId, username);
-    const { id } = await request.params;
-    let { limit, page } = request.query;
+    const { id } = await req.params;
+    let { limit, page } = req.query;
 
     // console.log({ id, userId });
     if (userId !== id) res.send({ error: "Id request is not match 🔒" });
@@ -119,7 +119,7 @@ exports.getBySellerId = async function getBySellerId(req, res) {
       }
     );
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     res.send({ error: error });
   }
 };
@@ -166,6 +166,38 @@ exports.getItemInCart = async function getItemInCart(req, res) {
 };
 exports.getItemBySellerId = async function getItemBySellerId(req, res) {
   try {
+    try {
+      // const userToken = await req.user;
+      // const userId = userToken.userId;
+      // console.log(userId, username);
+      const { id } = await req.params;
+      // let { limit, page } = req.query;
+
+      console.log({ id, obj: ObjectId(id) });
+      // if (userId !== id) res.send({ error: "Id request is not match 🔒" });
+      const data = await Order.find({
+        "products.product.seller._id": ObjectId(id),
+      }).sort({ createdAt: -1 });
+      // const prodArr = data.forin((i) =>
+      //   i.products.filter((prod) => prod.product.seller._id.toString() == id)
+      // );
+      const result = data.reduce((rs, i) => {
+        const prodArr = i.products.filter(
+          (prod) => prod.product.seller._id.toString() == id
+        );
+        const item = {
+          user: i.userOrder,
+          products: prodArr,
+        };
+        rs.push(item);
+        return rs;
+      }, []);
+      res.status(200);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+      res.send({ error });
+    }
   } catch (error) {}
 };
 
