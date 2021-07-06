@@ -586,5 +586,27 @@ exports.editRating = async function editRating(req, res) {
     res.send({ error: error.message });
   }
 };
-
+exports.editStatusItem = async function editStatusItem(req, res) {
+  try {
+    const decodedUser = req.user;
+    let newStatus = await req.body.status;
+    if (!newStatus) {
+      throw new Error(`Missing input value ��`);
+    }
+    const user = await User.findById(decodedUser.userId);
+    // * get id product via params
+    const { id } = await req.params;
+    if (!user) throw new Error("Cannot find User ��");
+    Item.findByIdAndUpdate(id, {
+      status: newStatus,
+    }).then((rs) => {
+      res.status(200);
+      res.send({ success: "New status updated 🙂" });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    res.send({ error });
+  }
+};
 // noice

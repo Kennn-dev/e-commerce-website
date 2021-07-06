@@ -55,6 +55,8 @@ router.post(
 );
 //endpoint destroy image on cloud when client edit
 router.post("/image/destroy/:id", productController.destroyImage);
+
+//
 router.post("/new", jwtAuth, productController.createNewProduct);
 router.post("/edit/:id", jwtAuth, productController.editProduct);
 router.post("/delete/:id", jwtAuth, productController.deleteProduct);
@@ -62,4 +64,5 @@ router.post("/add-to-cart/:id", jwtAuth, productController.addToCart);
 router.post("/remove-from-cart/:id", jwtAuth, productController.removeFromCart);
 router.post("/edit-cart/:id", jwtAuth, productController.editQuantity);
 router.post("/rating/:id", jwtAuth, productController.editRating);
+router.post("/status/:id", jwtAuth, productController.editStatusItem);
 module.exports = router;
