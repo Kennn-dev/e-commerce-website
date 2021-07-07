@@ -21,6 +21,7 @@ const {
   categoriesToQuery,
 } = require("./functions");
 const { Order } = require("../models/order");
+const { Comment } = require("../models/comment");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -200,6 +201,20 @@ exports.getItemBySellerId = async function getItemBySellerId(req, res) {
     }
   } catch (error) {}
 };
+exports.getComment = async function getComment(req, res) {
+  try {
+    // ??id product
+    const { id } = await req.params;
+    if (!id) throw new Error(`Missing id product value 😢`);
+    const cmts = await Comment.find({ productId: id });
+    res.status(200);
+    res.send(cmts);
+  } catch (error) {
+    console.log(error);
+    res.status(200);
+    res.send({ error: error.message });
+  }
+};
 
 //POST
 exports.uploadImage = async function uploadImage(req, res) {
@@ -226,6 +241,34 @@ exports.uploadImage = async function uploadImage(req, res) {
   } catch (error) {
     res.status(400);
     res.send({ error });
+  }
+};
+exports.createComment = async function createComment(req, res) {
+  try {
+    const { id } = await req.params;
+    const { userId } = await req.user;
+    const { content, media } = await req.body;
+    console.log(content);
+    if (!content) throw new Error(`Content cannot blank`);
+    if (!id) throw new Error(`Id product not found ⚠️`);
+    const user = await User.findById(userId);
+    const newCmt = {
+      productId: id,
+      user,
+      content,
+      media: media || [],
+    };
+    const cmt = new Comment(newCmt);
+    cmt.save().then((rs) => {
+      if (rs) {
+        res.status(200);
+        res.send({ success: `Created success 😃` });
+      }
+    });
+  } catch (error) {
+    res.status(500);
+    console.log(error);
+    res.send({ error: error.message });
   }
 };
 exports.destroyImage = async function destroyImage(req, res) {

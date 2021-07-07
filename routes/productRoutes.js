@@ -41,6 +41,10 @@ router.get(
 router.get("/seller/:id", jwtAuth, productController.getBySellerId);
 router.get("/in-cart", jwtAuth, productController.getItemInCart);
 router.get("/item-seller/:id", productController.getItemBySellerId);
+
+//Comment
+router.get("/comment/:id", productController.getComment);
+
 //POST
 //handle images with different endpoints
 //response id img to client when they send file uploads
@@ -53,6 +57,8 @@ router.post(
     res.send({ error: err.message });
   }
 );
+//Comment
+router.post("/comment/:id", jwtAuth, productController.createComment);
 //endpoint destroy image on cloud when client edit
 router.post("/image/destroy/:id", productController.destroyImage);
 
