@@ -10,6 +10,10 @@ const commentSchema = new Schema(
     },
     user: userSchema,
     content: String,
+    rate: {
+      type: Number,
+      default: 0,
+    },
     media: [],
   },
   { timestamps: true }

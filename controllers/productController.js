@@ -246,18 +246,24 @@ exports.createComment = async function createComment(req, res) {
   try {
     const { id } = await req.params;
     const { userId } = await req.user;
-    const { content, media } = await req.body;
+    const { content, media, rate } = await req.body;
+    const rating = Number(rate);
     console.log(content);
     if (!content) throw new Error(`Content cannot blank`);
     if (!id) throw new Error(`Id product not found ⚠️`);
+    const product = await Product.findById(id);
     const user = await User.findById(userId);
     const newCmt = {
       productId: id,
       user,
       content,
+      rate: rating,
       media: media || [],
     };
     const cmt = new Comment(newCmt);
+
+    product.rating = (product.rating * rating + rating) / (product.rating + 1);
+    await product.save();
     cmt.save().then((rs) => {
       if (rs) {
         res.status(200);
