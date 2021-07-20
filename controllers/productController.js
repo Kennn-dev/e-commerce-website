@@ -174,7 +174,6 @@ exports.getItemBySellerId = async function getItemBySellerId(req, res) {
       const { id } = await req.params;
       // let { limit, page } = req.query;
 
-      console.log({ id, obj: ObjectId(id) });
       // if (userId !== id) res.send({ error: "Id request is not match 🔒" });
       const data = await Order.find({
         "products.product.seller._id": ObjectId(id),
@@ -639,10 +638,15 @@ exports.editStatusItem = async function editStatusItem(req, res) {
     const user = await User.findById(decodedUser.userId);
     // * get id product via params
     const { id } = await req.params;
+    console.log(id);
     if (!user) throw new Error("Cannot find User ��");
-    Item.findByIdAndUpdate(id, {
-      status: newStatus,
-    }).then((rs) => {
+    ItemCart.findOneAndUpdate(
+      { _id: id },
+      {
+        orderStatus: newStatus,
+      }
+    ).then((rs) => {
+      console.log(rs);
       res.status(200);
       res.send({ success: "New status updated 🙂" });
     });
@@ -650,6 +654,23 @@ exports.editStatusItem = async function editStatusItem(req, res) {
     console.log(error);
     res.status(500);
     res.send({ error });
+  }
+};
+exports.modifyProduct = async function modifyProduct(req, res) {
+  try {
+    const { userId } = await req.user;
+    if (userId) throw new Error("Cannot find User 🙂");
+    const { id } = await req.params;
+    const content = await req.body;
+    const product = await Product.findOneAndUpdate(id, content);
+    if (!product) throw new Error("Cannot find product 😢");
+
+    res.status(200);
+    res.send({ success: " Update success 🥳" });
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({ error: err.message });
   }
 };
 // noice

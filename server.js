@@ -15,6 +15,7 @@ mongoose
     useCreateIndex: true,
     useFindAndModify: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
   })
   .then((connection) => {
     if (connection) consola.success("Database connected ✅");
@@ -29,7 +30,6 @@ mongoose
       console.error("Failed to connect to mongo on startup ", err);
     }
   });
-
 app.listen(port, () => {
   consola.success(`Server started at port ${port} 🤖`);
 });
